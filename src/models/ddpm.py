@@ -95,7 +95,9 @@ class DDPM():
         return x_0
     
     def save(self, path):
-        torch.save(self.network.state_dict(), path)
+        torch.save(self.network.state_dict(), path + "_network.pth")
+        np.save(path + "_T.npy", np.asarray(self.T))
 
     def load(self, path):
         self.network.load_state_dict(torch.load(path))
+        self.T = np.load(path + "_T.npy").item()

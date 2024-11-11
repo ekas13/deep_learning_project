@@ -10,16 +10,21 @@ class DDPM():
         self.betas = torch.linspace(0.0001, 0.02, T)
         self.alphas = 1 - self.betas
         self.loss = torch.nn.MSELoss()
+        self.alphas_cumulative = self.alpha_calculate_cumulative()
 
-    def alpha_calculate_cumulative(self, t):
+    def alpha_calculate_cumulative(self):
         # TODO: Check index
-        return torch.prod(self.alphas[:t])
+        alphas_cum = [self.alphas[0]]
+        for i in range(1, len(self.alphas)):
+            alphas_cum.append(alphas_cum[i-1] * self.alphas[i])
+        
+        return torch.tensor(alphas_cum).to(self.device)
     
     def reset(self):
         self.network.reset()
     
     def train(self, dataset_name: str, num_epochs: int, batch_size: int, opt: torch.optim.Optimizer):
-        train_data_loader = data_loader(dataset_name, batch_size)
+        train_data_loader = data_loader(dataset_name, batch_size, self.device)
         losses = []
 
         previous_loss = 0
@@ -27,16 +32,15 @@ class DDPM():
             current_loss = []
             while train_data_loader.has_next_batch():
                 #sample training params 
-                x_0_np = train_data_loader.get_batch()
-                x_0 = torch.tensor(x_0_np).to(self.device)  # Convert to tensor and move to device
-                x_0 = x_0.view(batch_size, 28*28)
+                batch = train_data_loader.get_batch()
+                x_0 = batch.view(batch_size, 28*28)
 
-                t = torch.randint(1, self.T + 1, (batch_size, 1), dtype=torch.int64, device=x_0.device)
+                t = torch.randint(1, self.T, (batch_size, 1), dtype=torch.int64, device=x_0.device)
 
                 epsilon = torch.randn_like(x_0, device=self.device)   #N(0,1)
                 
                 #create noisy observation
-                alpha_ = [self.alpha_calculate_cumulative(time).detach().to(self.device) for time in t]
+                alpha_ = [self.alphas_cumulative[time] for time in t]
                 alpha_ = torch.tensor(alpha_, device=self.device).view(-1, 1)  
                 x_noisy = torch.sqrt(alpha_)*x_0 + torch.sqrt(1-alpha_)*epsilon
                 
@@ -75,12 +79,11 @@ class DDPM():
                 #remove noise for this timestep transition
                 alpha_t = self.alphas[t]
                 beta_t = self.betas[t]
-                alpha_cum_t = self.alpha_calculate_cumulative(t).item()
+                alpha_cum_t = self.alphas_cumulative[t].item()
                 variance_t = beta_t             #variance of p_theta we have to choose based on x_0 - for now this since x_0 ~ N(0,I) 
                 
-                alpha_cum_t_minus_1 = self.alpha_calculate_cumulative(t - 1).item()  # Cumulative product up to t-1
-
-                # Variance term for DDPM, incorporating cumulative alphas for stability
+                #ALTERNATIVE VARIANCE
+                #alpha_cum_t_minus_1 = self.alphas_cumulative[t - 1].item()  # Cumulative product up to t-1
                 #variance_t = beta_t * (1 - alpha_cum_t_minus_1) / (1 - alpha_cum_t)
 
                 time = torch.tensor([[t]], dtype=torch.int64, device=x_T.device)

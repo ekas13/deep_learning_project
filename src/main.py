@@ -9,7 +9,7 @@ ddpm = DDPM(device=device, network=score_network_0())
 
 opt = torch.optim.AdamW(ddpm.network.parameters(), lr=2e-4)
 
-losses = ddpm.train(dataset_name="MNIST", num_epochs=10, batch_size=128, opt=opt)
+losses = ddpm.train(dataset_name="MNIST", num_epochs=150, batch_size=128, opt=opt)
 
 ddpm.save("results/testing")
 # plot_loss(losses)

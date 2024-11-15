@@ -62,7 +62,7 @@ class DDPM():
 
         return losses
 
-    def sample6(self):
+    def sample(self):
         with torch.no_grad(): #turn of grad 
             self.network.eval() #turn of dropout and similar
 

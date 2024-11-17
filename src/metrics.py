@@ -18,14 +18,17 @@ def fid_score(sampled_data: np.array, real_data: np.array, batch_size: int=64):
     sampled_features_list = []
     real_features_list = []
 
+    num_samples = sampled_data.shape[0]
+
     with tf.device('/CPU:0'):
-        for i in range(0, sampled_data.shape[0], batch_size):
+        for i in range(0, num_samples, batch_size):
             batch_sampled_data = sampled_data[i:i + batch_size]
             batch_real_data = real_data[i:i + batch_size]
             sampled_features = mnist_classifier_fn(batch_sampled_data)
             real_features = mnist_classifier_fn(batch_real_data)
             sampled_features_list.append(sampled_features)
             real_features_list.append(real_features)
+            print(f"Batch {i // batch_size + 1} processed")
 
     sampled_features = tf.concat(sampled_features_list, axis=0)
     real_features = tf.concat(real_features_list, axis=0)

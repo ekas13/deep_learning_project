@@ -33,8 +33,7 @@ class DDPM():
             current_loss = []
             while train_data_loader.has_next_batch():
                 #sample training params 
-                batch = train_data_loader.get_batch()
-                x_0 = batch.view(batch_size, 28*28)
+                x_0 = train_data_loader.get_batch()
 
                 t = torch.randint(1, self.T, (batch_size, 1), dtype=torch.int64, device=x_0.device)
 
@@ -62,12 +61,12 @@ class DDPM():
 
         return losses
 
-    def sample(self):
+    def sample(self, shape: tuple=(1, 784)):
         with torch.no_grad(): #turn of grad 
             self.network.eval() #turn of dropout and similar
 
             #generate noise sample
-            x_T = x_previous_t = torch.randn(1, 784, device=self.device)
+            x_T = x_previous_t = torch.randn(shape, device=self.device)
             x_0 = None
 
             if self.times is None:
@@ -93,7 +92,6 @@ class DDPM():
 
                 time = self.times[t].view(1, 1)
                 epsilon_hat = self.network(x_previous_t, time)
-                print(epsilon_hat)
                 # x_previous_t = (1/np.sqrt(alpha_t))*(x_previous_t - ((1-alpha_t)/np.sqrt(1-alpha_cum_t))*epsilon_hat) + (variance_t*z)
                 x_previous_t = (1 / np.sqrt(alpha_t)) * (x_previous_t - ((1 - alpha_t) / np.sqrt(1 - alpha_cum_t)) * epsilon_hat) + (np.sqrt(variance_t) * z)
                 

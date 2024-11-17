@@ -33,8 +33,7 @@ class DDPM():
             current_loss = []
             while train_data_loader.has_next_batch():
                 #sample training params 
-                batch = train_data_loader.get_batch()
-                x_0 = batch.view(batch_size, 28*28)
+                x_0 = train_data_loader.get_batch()
 
                 t = torch.randint(1, self.T, (batch_size, 1), dtype=torch.int64, device=x_0.device)
 
@@ -62,17 +61,14 @@ class DDPM():
 
         return losses
 
-    def sample(self):
+    def sample(self, shape: tuple=(1, 784)):
         with torch.no_grad(): #turn of grad 
             self.network.eval() #turn of dropout and similar
 
             #generate noise sample
-            x_T = x_previous_t = torch.randn(1, 784, device=self.device)
+            x_T = x_previous_t = torch.randn(shape, device=self.device)
             x_0 = None
-            betas_gpu = self.betas.to(self.device)
-            alphas_gpu = self.betas.to(self.device)
 
-            # its calculated on the first sample run and reused later
             if self.times is None:
                 self.calculate_times()
 
@@ -80,14 +76,14 @@ class DDPM():
             for t in range(self.T-1, 0, -1):
 
                 #set noise 
-                z =  torch.zeros_like(x_T, device=self.device)      #special case when it's the last transition 1->0
+                z =  torch.zeros_like(x_T)      #special case when it's the last transition 1->0
                 if t > 1:
-                    z = torch.randn_like(x_T, device=self.device)   #otherwise, N(0,1) 
+                    z = torch.randn_like(x_T)   #otherwise, N(0,1) 
 
                 #remove noise for this timestep transition
-                alpha_t = alphas_gpu[t]
-                beta_t = betas_gpu[t]
-                alpha_cum_t = self.alphas_cumulative[t]
+                alpha_t = self.alphas[t]
+                beta_t = self.betas[t]
+                alpha_cum_t = self.alphas_cumulative[t].item()
                 variance_t = beta_t             #variance of p_theta we have to choose based on x_0 - for now this since x_0 ~ N(0,I) 
                 
                 #ALTERNATIVE VARIANCE
@@ -96,9 +92,8 @@ class DDPM():
 
                 time = self.times[t].view(1, 1)
                 epsilon_hat = self.network(x_previous_t, time)
-
                 # x_previous_t = (1/np.sqrt(alpha_t))*(x_previous_t - ((1-alpha_t)/np.sqrt(1-alpha_cum_t))*epsilon_hat) + (variance_t*z)
-                x_previous_t = (1 / torch.sqrt(alpha_t)) * (x_previous_t - ((1 - alpha_t) / torch.sqrt(1 - alpha_cum_t)) * epsilon_hat) + (torch.sqrt(variance_t) * z)
+                x_previous_t = (1 / np.sqrt(alpha_t)) * (x_previous_t - ((1 - alpha_t) / np.sqrt(1 - alpha_cum_t)) * epsilon_hat) + (np.sqrt(variance_t) * z)
                 
                 x_0 = x_previous_t #remember last for return
 

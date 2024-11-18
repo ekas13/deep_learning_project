@@ -7,3 +7,13 @@
 - Filip Penzar - s232452
 
 ---
+
+#### DTU HPC jobs
+
+edit the jobscript-TEMPLATE.sh with your path.
+
+- run `bsub < jobscript.sh`
+
+- use `bstat` to see the status of your jobs
+
+- use `bkill -JOB_ID` to delete job from queue.

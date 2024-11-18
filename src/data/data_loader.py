@@ -24,7 +24,7 @@ class data_loader():
             )
             train_set = CIFAR10("./temp/", train=True, download=True, transform=transform)
             test_set = CIFAR10("./temp/", train=False, download=True, transform=transform)
-            self.x_train = torch.tensor(train_set.data).permute(0, 3, 1, 2).float().div_(255).to(device)
+            self.x_train = torch.tensor(train_set.data).permute(0, 3, 1, 2).float().div_(255).to(device) # (batch, 3, 32, 32)
             self.x_test = torch.tensor(test_set.data).permute(0, 3, 1, 2).float().div_(255).to(device)
         
         self.current_batch = 0

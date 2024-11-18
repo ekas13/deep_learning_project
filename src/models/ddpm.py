@@ -52,12 +52,9 @@ class DDPM():
                 opt.step()                                      #train params
                 current_loss.append(batch_loss.item())
             losses.append(np.mean(current_loss))
-            train_data_loader.reset()
+            train_data_loader.reset() # IMPORTANT!!!!
 
             print(f"Epoch {i+1} | Loss {losses[-1]}")
-            # if abs(previous_loss - current_loss) < convergence_threshold:
-            #     break
-            # previous_loss = current_loss
 
         return losses
 

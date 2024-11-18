@@ -25,5 +25,5 @@
 
 module load python3/3.11.9
 
-source YOUR_PATH .venv/bin/activate
+source YOUR_PATH YOUR_VENV_FOLDER/bin/activate
 python YOUR_PATH/src/sample.py

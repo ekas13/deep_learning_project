@@ -1,5 +1,7 @@
 #!/bin/sh
 ### ------------- specify queue name ----------------
+### -q gpua100: for GPU queue
+### -q hpc: for faster queue
 #BSUB -q gpua100
 
 ### ------------- specify gpu request----------------

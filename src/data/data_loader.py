@@ -9,13 +9,17 @@ class data_loader():
         self.device = device
 
         self.x_train = None
+        self.y_train = None
         self.x_test = None
+        self.y_test = None
 
         if self.dataset_name == "MNIST":
             train_set = MNIST("./temp/", train=True, download=True)
             test_set = MNIST("./temp/", train=False, download=True)
             self.x_train = train_set.data.view(-1, 784).float().div_(255).to(device)
+            self.y_train = train_set.targets.to(device)
             self.x_test = test_set.data.view(-1, 784).float().div_(255).to(device)
+            self.y_test = test_set.targets.to(device)
         elif self.dataset_name == "CIFAR10":
             transform = transforms.Compose(
                 [transforms.ToTensor(),
@@ -25,7 +29,9 @@ class data_loader():
             train_set = CIFAR10("./temp/", train=True, download=True, transform=transform)
             test_set = CIFAR10("./temp/", train=False, download=True, transform=transform)
             self.x_train = torch.tensor(train_set.data).permute(0, 3, 1, 2).float().div_(255).to(device) # (batch, 3, 32, 32)
+            self.y_train = torch.tensor(train_set.targets).to(device)
             self.x_test = torch.tensor(test_set.data).permute(0, 3, 1, 2).float().div_(255).to(device)
+            self.y_test = torch.tensor(test_set.targets).to(device)
         
         self.current_batch = 0
         self.dataset_size = self.x_train.shape[0]
@@ -36,7 +42,7 @@ class data_loader():
     def get_batch(self):
         slce = range(self.current_batch * self.batch_size, (self.current_batch + 1) * self.batch_size)
         self.current_batch += 1
-        return self.x_train[slce]
+        return self.x_train[slce], self.y_train[slce]
     
     def reset(self):
         self.current_batch = 0

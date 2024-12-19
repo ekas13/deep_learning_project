@@ -8,6 +8,12 @@
 
 ---
 
+#### Main results
+
+The main results can be found in `src/MAIN_RESULTS.ipynb`
+
+---
+
 #### DTU HPC jobs
 
 edit the jobscript-TEMPLATE.sh with your path.

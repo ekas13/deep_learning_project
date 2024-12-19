@@ -21,7 +21,7 @@ def plot_samples(samples, path):
     for i in range(classes):
         for j in range(classes):
             # Detach the tensor and convert it to a NumPy array
-            canvas[i * dim:(i + 1) * dim, j * dim:(j + 1) * dim] = samples[idx].cpu().detach().reshape((dim, dim)).numpy()
+            canvas[i * dim:(i + 1) * dim, j * dim:(j + 1) * dim] = samples[idx].reshape((dim, dim))
             idx += 1
 
         print(str(i) + ' sample')
@@ -31,4 +31,7 @@ def plot_samples(samples, path):
     plt.axis('off')
     plt.imshow(canvas, cmap='gray')
     plt.title('MNIST handwritten digits')
-    plt.savefig(path)
+    if path:
+        plt.savefig(path)
+    else:
+        plt.show()

@@ -28,7 +28,6 @@ def fid_score(sampled_data: np.array, real_data: np.array, batch_size: int=64):
             real_features = mnist_classifier_fn(batch_real_data)
             sampled_features_list.append(sampled_features)
             real_features_list.append(real_features)
-            print(f"Batch {i // batch_size + 1} processed")
 
     sampled_features = tf.concat(sampled_features_list, axis=0)
     real_features = tf.concat(real_features_list, axis=0)

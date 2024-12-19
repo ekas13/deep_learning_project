@@ -4,7 +4,7 @@ from data.data_loader import data_loader
 import math
 
 class DDPM():
-    def __init__(self, device, network: torch.nn.Module, T: int = 1000, cfg = False, num_classes: int = 10, p_unconditional = 0.1):
+    def __init__(self, device, network: torch.nn.Module, T: int = 1000, cfg = False, num_classes: int = 10, p_unconditional = 0.1, scheduler="cosine"):
         self.device = device
         self.network = network.to(device)
         self.T = T 
@@ -17,6 +17,7 @@ class DDPM():
         self.label_embedding = torch.nn.Embedding(num_embeddings=num_classes, embedding_dim=self.embedding_dim).to(device)
         self.cfg = cfg
         self.p_unconditional = p_unconditional
+        self.scheduler = scheduler
         
 
     def alpha_calculate_cumulative(self):
@@ -35,7 +36,10 @@ class DDPM():
         losses = []
         
         if self.times is None:
-            self.calculate_times()
+            if self.scheduler == "cosine":
+                self.calculate_times_cosine()
+            else:
+                self.calculate_times_linear()
 
         previous_loss = 0
         for i in range(num_epochs):
@@ -100,11 +104,15 @@ class DDPM():
             x_0 = None
 
             if self.times is None:
-                self.calculate_times()
+                if self.scheduler == "cosine":
+                    self.calculate_times_cosine()
+                else:
+                    self.calculate_times_linear()
+
+            sample_steps = []
 
             #removing the noise for each transition
-            for t in range(self.T-1, 0, -1):
-
+            for t in range(self.T-1, 0, -1):	
                 #set noise 
                 z =  torch.zeros_like(x_T)      #special case when it's the last transition 1->0
                 if t > 1:
@@ -135,16 +143,15 @@ class DDPM():
                 # x_previous_t = (1/np.sqrt(alpha_t))*(x_previous_t - ((1-alpha_t)/np.sqrt(1-alpha_cum_t))*epsilon_hat) + (variance_t*z)
                 x_previous_t = (1 / np.sqrt(alpha_t)) * (x_previous_t - ((1 - alpha_t) / np.sqrt(1 - alpha_cum_t)) * epsilon_hat) + (np.sqrt(variance_t) * z)
                 
+                if t % 50 == 0 or t == 1:
+                    sample_steps.append(x_previous_t)
+
                 x_0 = x_previous_t #remember last for return
 
         #return final calculated x_0
-        return x_0
-
-
-    # def calculate_times(self):
-        # self.times = torch.arange(self.T, dtype=torch.int64, device=self.device).view(-1, 1)
+        return x_0, sample_steps
     
-    def calculate_times(self):
+    def calculate_times_cosine(self):
         # Create linearly spaced time steps [0, T)
         t = torch.arange(self.T, dtype=torch.float32, device=self.device).view(-1, 1)
 
@@ -155,6 +162,11 @@ class DDPM():
 
         # Combine sine and cosine embeddings
         self.times = torch.cat([sinusoidal_emb.sin(), sinusoidal_emb.cos()], dim=-1)
+        print(self.times.shape)
+    
+    def calculate_times_linear(self):
+        t = torch.arange(self.T, dtype=torch.int64, device=self.device).view(-1, 1)
+        self.times = torch.tensor(np.tile(t.cpu(), (1, 28))).to(self.device)
 
     
     def save(self, path):
@@ -165,6 +177,9 @@ class DDPM():
 
     def load(self, path, load_T=False):
         self.network.load_state_dict(torch.load(f"{path}_network.pth", weights_only=False))
-        self.label_embedding.load_state_dict(torch.load(f"{path}_label_embedding.pth", weights_only=False))
+        try:
+            self.label_embedding.load_state_dict(torch.load(f"{path}_label_embedding.pth", weights_only=False))
+        except:
+            print("No label embedding found")
         if load_T:
             self.T = np.load(f"{path}_T.npy").item()

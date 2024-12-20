@@ -10,7 +10,13 @@
 
 #### Main results
 
-The main results can be found in `src/MAIN_RESULTS.ipynb`
+The main results can be found in [src/MAIN_RESULTS.ipynb](src/MAIN_RESULTS.ipynb).
+
+---
+
+#### Poster
+
+The poster can be found in [here](poster.pdf).
 
 ---
 

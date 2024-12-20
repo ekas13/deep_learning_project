@@ -1,2 +1,0 @@
-FID score for 30000 samples on train set: 3.4794166376223714
-FID score for 10000 samples on test set: 3.511875757795483

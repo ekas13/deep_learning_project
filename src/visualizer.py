@@ -36,6 +36,30 @@ def plot_samples(samples, path):
     else:
         plt.show()
 
+def plot_samples_cifar(samples, path):
+    idx, dim, classes = 0, 32, np.sqrt(len(samples)).astype(int)
+
+    # create empty canvas
+    canvas = np.zeros((dim * classes, classes * dim))
+
+    # fill with tensors
+    for i in range(classes):
+        for j in range(classes):
+            # Detach the tensor and convert it to a NumPy array
+            canvas[i * dim:(i + 1) * dim, j * dim:(j + 1) * dim] = samples[idx].reshape((dim, dim))
+            idx += 1
+
+        print(str(i) + ' sample')
+
+    # visualize matrix of tensors as gray scale image
+    plt.figure(figsize=(4, 4))
+    plt.axis('off')
+    plt.imshow(canvas, cmap='gray')
+    plt.title('MNIST handwritten digits')
+    if path:
+        plt.savefig(path)
+    else:
+        plt.show()
 
 if __name__ == "__main__":
 

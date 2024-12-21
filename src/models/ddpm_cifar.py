@@ -13,7 +13,7 @@ class DDPM():
         self.loss = torch.nn.MSELoss()
         self.alphas_cumulative = self.alpha_calculate_cumulative()
         self.times = None
-        self.embedding_dim = 28
+        self.embedding_dim = 128
         self.label_embedding = torch.nn.Embedding(num_embeddings=num_classes, embedding_dim=self.embedding_dim).to(device)
         self.cfg = cfg
         self.p_unconditional = p_unconditional
@@ -37,8 +37,10 @@ class DDPM():
         losses = []
 
         if self.times is None:
-            self.calculate_times_cosine()
-            # print(self.times)
+            if self.scheduler == "cosine":
+                self.calculate_times_cosine()
+            else:
+                self.calculate_times_linear()
 
         for i in range(num_epochs):
             current_loss = []

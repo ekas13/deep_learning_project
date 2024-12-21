@@ -1,5 +1,5 @@
 from models.ddpm_cifar import DDPM
-from networks.score_network import score_network_0, score_network_1, CIFAR10ScoreNetwork
+from networks.score_network import score_network_0, score_network_1, CIFAR10ScoreNetwork, ImprovedCIFAR10ScoreNetwork
 from visualizer import plot_loss, plot_samples
 import torch
 import datetime
@@ -42,7 +42,7 @@ def train_ddpm_cifar10():
                config={"learning_rate": 2e-4, "batch_size": 128, "epochs": 2})
     config = wandb.config
 
-    ddpm = DDPM(device=device, network=CIFAR10ScoreNetwork())
+    ddpm = DDPM(device=device, network=ImprovedCIFAR10ScoreNetwork())
     opt = torch.optim.AdamW(ddpm.network.parameters(), lr=config.learning_rate)
 
     losses = ddpm.train(dataset_name="CIFAR-10", num_epochs=config.epochs, batch_size=config.batch_size, opt=opt)

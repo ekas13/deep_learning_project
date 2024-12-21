@@ -35,3 +35,24 @@ def plot_samples(samples, path):
         plt.savefig(path)
     else:
         plt.show()
+
+
+if __name__ == "__main__":
+
+  EPOCH = "500"
+  samples = np.load(f"experiments/jan_experiments/9_samples_epoch_{EPOCH}.npy")
+  # Plot the 25 RGB samples
+  fig, axes = plt.subplots(3, 3, figsize=(10, 10))
+  # # Iterate through each sample and plot
+  
+  for i, ax in enumerate(axes.flat):
+    sample = samples[i].transpose(1, 2, 0)  # Transpose to (32, 32, 3) for RGB format
+    ax.imshow(sample)
+
+    # ax.imshow(samples[i], cmap='gray')
+    
+    ax.axis('off')  # Turn off axis for cleaner visualization
+
+  plt.savefig(f"{EPOCH}.png")
+  plt.tight_layout()
+  plt.show()

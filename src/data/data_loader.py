@@ -20,6 +20,7 @@ class data_loader():
             self.y_train = train_set.targets.to(device)
             self.x_test = test_set.data.view(-1, 784).float().div_(255).to(device)
             self.y_test = test_set.targets.to(device)
+        
         elif self.dataset_name == "CIFAR10":
             transform = transforms.Compose(
                 [transforms.ToTensor(),

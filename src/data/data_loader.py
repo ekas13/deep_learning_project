@@ -21,7 +21,7 @@ class data_loader():
             self.x_test = test_set.data.view(-1, 784).float().div_(255).to(device)
             self.y_test = test_set.targets.to(device)
         
-        elif self.dataset_name == "CIFAR10":
+        elif self.dataset_name == "CIFAR-10":
             transform = transforms.Compose(
                 [transforms.ToTensor(),
                 transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),  # subtract 0.5 and divide by 0.5

@@ -1,12 +1,8 @@
 import torch
-from data.data_loader import data_loader
-from models.ddpm import DDPM
-from metrics import fid_score
-from networks.score_network import score_network_0, score_network_1, CIFAR10ScoreNetwork
+from models.ddpm_cifar import DDPM
+from networks.score_network import CIFAR10ScoreNetwork
 import numpy as np
-import wandb
 import datetime as datetime
-import torchvision.utils as vutils
 
 NUM_SAMPLES =  10000
 EPOCHS = 1000

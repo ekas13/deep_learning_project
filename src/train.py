@@ -1,4 +1,4 @@
-from models.ddpm import DDPM
+from models.ddpm_cifar import DDPM
 from networks.score_network import score_network_0, score_network_1, CIFAR10ScoreNetwork
 from visualizer import plot_loss, plot_samples
 import torch
@@ -39,7 +39,7 @@ def train_cfg():
 def train_ddpm_cifar10():
     datetime_suffix = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M")
     wandb.init(project="ddpm-training", name=f"train_ddpm_cifar10_{datetime_suffix}", 
-               config={"learning_rate": 2e-4, "batch_size": 128, "epochs": 1000})
+               config={"learning_rate": 2e-4, "batch_size": 128, "epochs": 2})
     config = wandb.config
 
     ddpm = DDPM(device=device, network=CIFAR10ScoreNetwork())

@@ -37,7 +37,7 @@ class DDPM():
         losses = []
 
         if self.times is None:
-            self.calculate_times()
+            self.calculate_times_cosine()
             # print(self.times)
 
         for i in range(num_epochs):
